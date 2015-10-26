@@ -294,7 +294,18 @@ namespace NuGetGallery
             using (var packageStream = ReadPackageFromRequest())
             using (var packageToPush = new PackageReader(packageStream, leaveStreamOpen: false))
             {
-                var nuspec = packageToPush.GetNuspecReader();
+                NuspecReader nuspec = null;
+                try
+                {
+                    nuspec = packageToPush.GetNuspecReader();
+                }
+                catch (Exception ex)
+                {
+                    return new HttpStatusCodeWithBodyResult(HttpStatusCode.BadRequest, string.Format(
+                        CultureInfo.CurrentCulture,
+                        Strings.UploadPackage_InvalidNuspec,
+                        ex.Message));
+                }
 
                 if (nuspec.GetMinClientVersion() > Constants.MaxSupportedMinClientVersion)
                 {

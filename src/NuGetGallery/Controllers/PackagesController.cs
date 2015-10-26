@@ -216,8 +216,8 @@ namespace NuGetGallery
                     _cacheService.RemoveProgress(currentUser.Username);
                 }
 
-                var nuspec = nuGetPackage.GetNuspecReader();
-                var errors = ManifestValidator.Validate(nuspec).ToArray();
+                NuspecReader nuspec;
+                var errors = ManifestValidator.Validate(nuGetPackage.GetNuspec(), out nuspec).ToArray();
                 if (errors.Length > 0)
                 {
                     foreach (var error in errors)
@@ -854,8 +854,16 @@ namespace NuGetGallery
                     return Redirect(Url.UploadPackage());
                 }
 
-                packageMetadata = PackageMetadata.FromNuspecReader(
-                    package.GetNuspecReader());
+                try
+                {
+                    packageMetadata = PackageMetadata.FromNuspecReader(
+                        package.GetNuspecReader());
+                }
+                catch (Exception ex)
+                {
+                    TempData["Message"] = ex.GetUserSafeMessage();
+                    return Redirect(Url.UploadPackage());
+                }
             }
 
             var model = new VerifyPackageRequest
@@ -1068,7 +1076,7 @@ namespace NuGetGallery
         {
             try
             {
-                return new PackageReader(stream, leaveStreamOpen: false);
+                return new PackageReader(stream, leaveStreamOpen: true);
             }
             catch (Exception)
             {

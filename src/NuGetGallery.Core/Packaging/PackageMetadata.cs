@@ -107,7 +107,13 @@ namespace NuGetGallery.Packaging
         {
             var value = GetValueOr(key, alternateValue.ToString());
 
-            return bool.Parse(value);
+            bool result;
+            if (bool.TryParse(value, out result))
+            {
+                return result;
+            }
+
+            return alternateValue;
         }
 
         private Uri GetUriOr(string key, Uri alternateValue)
@@ -115,7 +121,11 @@ namespace NuGetGallery.Packaging
             var value = GetValueOr(key, null);
             if (!string.IsNullOrEmpty(value))
             {
-                return new Uri(value);
+                Uri result;
+                if (Uri.TryCreate(value, UriKind.Absolute, out result))
+                {
+                    return result;
+                }
             }
 
             return alternateValue;

@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using NuGet.Packaging;
-using NuGet.Versioning;
 
 namespace NuGetGallery.Packaging
 {
@@ -16,12 +16,21 @@ namespace NuGetGallery.Packaging
         // Copy-pasta from NuGet: src/Core/Utility/PackageIdValidator.cs because that constant is internal :(
         public static readonly int MaxPackageIdLength = 100;
         
-        public static IEnumerable<ValidationResult> Validate(NuspecReader nuspecReader)
+        public static IEnumerable<ValidationResult> Validate(Stream nuspecStream, out NuspecReader nuspecReader)
         {
-            var metadata = nuspecReader.GetMetadata();
-            if (metadata != null && metadata.Any())
+            try
             {
-                return ValidateCore(PackageMetadata.FromNuspecReader(nuspecReader));
+                nuspecReader = new NuspecReader(nuspecStream);
+                var rawMetadata = nuspecReader.GetMetadata();
+                if (rawMetadata != null && rawMetadata.Any())
+                {
+                    return ValidateCore(PackageMetadata.FromNuspecReader(nuspecReader));
+                }
+            }
+            catch (Exception ex)
+            {
+                nuspecReader = null;
+                return new [] { new ValidationResult(ex.Message) };
             }
 
             return Enumerable.Empty<ValidationResult>();
@@ -48,7 +57,7 @@ namespace NuGetGallery.Packaging
                         packageMetadata.Id));
                 }
             }
-            
+
             // Check URL properties
             foreach (var result in CheckUrls(
                 packageMetadata.GetValueFromMetadata("IconUrl"),
@@ -61,10 +70,12 @@ namespace NuGetGallery.Packaging
             // Check version
             if (packageMetadata.Version == null)
             {
+                var version = packageMetadata.GetValueFromMetadata("version");
+
                 yield return new ValidationResult(String.Format(
                     CultureInfo.CurrentCulture,
                     Strings.Manifest_InvalidVersion,
-                    packageMetadata.Version));
+                    version));
             }
 
             // Check dependency groups

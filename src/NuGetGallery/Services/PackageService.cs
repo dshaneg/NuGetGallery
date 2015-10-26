@@ -409,8 +409,8 @@ namespace NuGetGallery
             if (packageRegistration == null)
             {
                 packageRegistration = new PackageRegistration
-                    {
-                        Id = packageMetadata.Id
+                {
+                    Id = packageMetadata.Id
                 };
 
                 packageRegistration.Owners.Add(currentUser);
