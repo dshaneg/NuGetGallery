@@ -204,7 +204,7 @@ namespace NuGetGallery
             var versionValues = versions.Trim().Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
             var targetFrameworkValues = String.IsNullOrEmpty(targetFrameworks)
                                             ? null
-                                            : targetFrameworks.Split('|').Select(tfx => NuGetFramework.ParseFrameworkName(tfx, DefaultFrameworkNameProvider.Instance)).ToList();
+                                            : targetFrameworks.Split('|').Select(tfx => NuGetFramework.Parse(tfx)).ToList();
             var versionConstraintValues = String.IsNullOrEmpty(versionConstraints)
                                             ? new string[idValues.Length]
                                             : versionConstraints.Split('|');
@@ -265,8 +265,8 @@ namespace NuGetGallery
 
                                 return (version > clientVersion) &&
                                         (targetFrameworkValues == null ||
-                                        targetFrameworkValues.Any(s => supportedPackageFrameworks.Any(
-                                            supported => NuGetFrameworkUtility.IsCompatibleWithFallbackCheck(s, supported)))) &&
+                                        !supportedPackageFrameworks.Any() ||
+                                        targetFrameworkValues.Any(s => supportedPackageFrameworks.Any(supported => NuGetFrameworkUtility.IsCompatibleWithFallbackCheck(s, supported)))) &&
                                         (versionConstraint == null || versionConstraint.Satisfies(version));
                             })
                           select p;

@@ -56,7 +56,7 @@ namespace NuGetGallery.Packaging
             Owners = GetValueOr("owners", null);
 
             var authorsString = GetValueOr("authors", Owners ?? string.Empty);
-            Authors = new List<string>(authorsString.Split(','));
+            Authors = new List<string>(authorsString.Split(',').Select(author => author.Trim()));
         }
 
         public string Id { get; private set; }

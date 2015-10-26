@@ -80,7 +80,7 @@ namespace NuGetGallery
             var net40Fx = new NuGetFramework(".NETFramework", new Version(4, 0));
             return (galleryPackage.SupportedFrameworks.Count == 0) ||
                 (from fx in galleryPackage.SupportedFrameworks
-                 let fxName = NuGetFramework.ParseFrameworkName(fx.TargetFramework, DefaultFrameworkNameProvider.Instance)
+                 let fxName = NuGetFramework.Parse(fx.TargetFramework)
                  where fxName == net40Fx
                  select fx)
                 .Any();

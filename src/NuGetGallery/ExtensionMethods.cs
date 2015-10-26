@@ -284,12 +284,26 @@ namespace NuGetGallery
 
                 // Recursively parse the profile
                 var subprofiles = frameworkName.Profile.Split('+');
-                sb.Append(String.Join(", ", subprofiles.Select(s => NuGetFramework.ParseFrameworkName(s, DefaultFrameworkNameProvider.Instance).ToFriendlyName())));
+                sb.Append(String.Join(", ", subprofiles.Select(s => NuGetFramework.Parse(s).ToFriendlyName())));
                 sb.Append(")");
             }
             else
             {
-                sb.AppendFormat("{0} {1}", frameworkName.Framework, frameworkName.Version);
+                string version = null;
+                if (frameworkName.Version.Build == 0)
+                {
+                    version = frameworkName.Version.ToString(2);
+                }
+                else if (frameworkName.Version.Revision == 0)
+                {
+                    version = frameworkName.Version.ToString(3);
+                }
+                else
+                {
+                    version = frameworkName.Version.ToString();
+                }
+
+                sb.AppendFormat("{0} {1}", frameworkName.Framework, version);
                 if (!String.IsNullOrEmpty(frameworkName.Profile))
                 {
                     sb.AppendFormat(" {0}", frameworkName.Profile);

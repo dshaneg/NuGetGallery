@@ -22,8 +22,7 @@ namespace NuGetGallery
             set
             {
                 _targetFramework = value;
-                FrameworkName = NuGetFramework.ParseFrameworkName(
-                    _targetFramework, DefaultFrameworkNameProvider.Instance);
+                FrameworkName = NuGetFramework.Parse(_targetFramework);
             }
         }
 
