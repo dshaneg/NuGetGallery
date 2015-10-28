@@ -283,7 +283,7 @@ namespace NuGetGallery
                 sb.Append("Portable Class Library (");
 
                 // Recursively parse the profile
-                var subprofiles = frameworkName.Profile.Split('+');
+                var subprofiles = frameworkName.GetShortFolderName().Replace("portable-", string.Empty).Split('+');
                 sb.Append(String.Join(", ", subprofiles.Select(s => NuGetFramework.Parse(s).ToFriendlyName())));
                 sb.Append(")");
             }
